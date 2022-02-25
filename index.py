@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
-from account import Account
 from src.logger import logger, loggerMapClicked
 from cv2 import cv2
 from os import listdir
@@ -12,13 +10,12 @@ import pyautogui
 import time
 import sys
 import yaml
-import pygetwindow
+
 # Load config file.
 stream = open("config.yaml", 'r')
 c = yaml.safe_load(stream)
 ct = c['threshold']
 ch = c['home']
-cw = c['window']
 pause = c['time_intervals']['interval_between_moviments']
 pyautogui.PAUSE = pause
 
@@ -53,6 +50,11 @@ cat = """
 >>---> Some configs can be found in the config.yaml file."""
 
 
+
+
+
+
+
 def addRandomness(n, randomn_factor_size=None):
     """Returns n with randomness
     Parameters:
@@ -76,7 +78,6 @@ def addRandomness(n, randomn_factor_size=None):
     # logger('{} with randomness -> {}'.format(int(n), randomized_n))
     return int(randomized_n)
 
-
 def moveToWithRandomness(x, y, t):
     pyautogui.moveTo(addRandomness(x, 10), addRandomness(y, 10), t + random() / 2)
 
@@ -87,7 +88,6 @@ def remove_suffix(input_string, suffix):
     if suffix and input_string.endswith(suffix):
         return input_string[:-len(suffix)]
     return input_string
-
 
 def load_images(dir_path='./targets/'):
     """ Programatically loads all images of dir_path as a key:value where the
@@ -162,7 +162,6 @@ def clickBtn(img, timeout=3, threshold=ct['default']):
 
     return False
 
-
 def printSreen():
     with mss.mss() as sct:
         monitor = sct.monitors[0]
@@ -172,7 +171,6 @@ def printSreen():
 
         # Grab the data
         return sct_img[:, :, :3]
-
 
 def positions(target, threshold=ct['default'], img=None):
     if img is None:
@@ -204,8 +202,7 @@ def scroll():
     if not c['use_click_and_drag_instead_of_scroll']:
         pyautogui.scroll(-c['scroll_size'])
     else:
-        pyautogui.dragRel(0, -c['click_and_drag_amount'],
-                          duration=1, button='left')
+        pyautogui.dragRel(0, -c['click_and_drag_amount'],duration=1, button='left')
 
 
 def clickButtons():
@@ -222,7 +219,6 @@ def clickButtons():
             return
     return len(buttons)
 
-
 def isHome(hero, buttons):
     y = hero[1]
 
@@ -234,7 +230,6 @@ def isHome(hero, buttons):
             return False
     return True
 
-
 def isWorking(bar, buttons):
     y = bar[1]
 
@@ -245,7 +240,6 @@ def isWorking(bar, buttons):
             return False
     return True
 
-
 def clickGreenBarButtons():
     # ele clicka nos q tao trabaiano mas axo q n importa
     offset = 140
@@ -255,13 +249,13 @@ def clickGreenBarButtons():
     buttons = positions(images['go-work'], threshold=ct['go_to_work_btn'])
     logger('🆗 %d buttons detected' % len(buttons))
 
+
     not_working_green_bars = []
     for bar in green_bars:
         if not isWorking(bar, buttons):
             not_working_green_bars.append(bar)
     if len(not_working_green_bars) > 0:
-        logger('🆗 %d buttons with green bar detected' %
-               len(not_working_green_bars))
+        logger('🆗 %d buttons with green bar detected' % len(not_working_green_bars))
         logger('👆 Clicking in %d heroes' % len(not_working_green_bars))
 
     # se tiver botao com y maior que bar y-10 e menor que y+10
@@ -274,27 +268,10 @@ def clickGreenBarButtons():
         hero_clicks = hero_clicks + 1
         hero_clicks_cnt = hero_clicks_cnt + 1
         if hero_clicks_cnt > 20:
-            logger(
-                '⚠️ Too many hero clicks, try to increase the go_to_work_btn threshold')
+            logger('⚠️ Too many hero clicks, try to increase the go_to_work_btn threshold')
             return
         #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
     return len(not_working_green_bars)
-
-
-def clickAllGreenButton():
-    buttons = positions(images['go-all-work'],
-                        threshold=ct['go_all_to_work_btn'])
-    # print('buttons: {}'.format(len(buttons)))
-    for (x, y, w, h) in buttons:
-        moveToWithRandomness(x+(w/2), y+(h/2), 1)
-        pyautogui.click()
-        global hero_clicks
-        hero_clicks = hero_clicks + 1
-        #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
-        if hero_clicks > 20:
-            logger('too many hero clicks, try to increase the go_to_work_btn threshold')
-            return
-    return len(buttons)
 
 
 def clickFullBarButtons():
@@ -318,6 +295,20 @@ def clickFullBarButtons():
 
     return len(not_working_full_bars)
 
+def clickAllGreenButton():
+    buttons = positions(images['go-all-work'],
+                        threshold=ct['go_all_to_work_btn'])
+    # print('buttons: {}'.format(len(buttons)))
+    for (x, y, w, h) in buttons:
+        moveToWithRandomness(x+(w/2), y+(h/2), 1)
+        pyautogui.click()
+        global hero_clicks
+        hero_clicks = hero_clicks + 1
+        #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
+        if hero_clicks > 20:
+            logger('too many hero clicks, try to increase the go_to_work_btn threshold')
+            return
+    return len(buttons)
 
 def goToHeroes():
     if clickBtn(images['go-back-arrow']):
@@ -505,7 +496,6 @@ def main():
     hero_clicks = 0
     login_attempts = 0
     last_log_is_progress = False
-    accounts = []
 
     global images
     images = load_images()
@@ -521,54 +511,37 @@ def main():
     time.sleep(7)
     t = c['time_intervals']
 
-    title = 'Bombcrypto - '
-
-    windows = pygetwindow.getWindowsWithTitle(title)
-    
-    
-    for window in windows:
-        index = windows.index(window)
-        accounts.append(Account(window, index))
-    # =========
+    last = {
+    "login" : 0,
+    "heroes" : 0,
+    "new_map" : 0,
+    "check_for_captcha" : 0,
+    "refresh_heroes" : 0
+    }
 
     while True:
+        now = time.time()
+           
+        if now - last["login"] > addRandomness(t['check_for_login'] * 60):
+            last["login"] = now
+            login()
 
-        for account in accounts:
-            now = time.time()
-            account.window.activate()
-            
-            logger("\n\n\033[1mInformações da janela {0}\033[0m".format(account.index))
-            if now - account.last["login"] > addRandomness(t['check_for_login'] * 60):
-                if cw['auto_position']:
-                    account.window.moveTo(cw['left'], cw['top'])
-                    account.window.resizeTo(1015, 823)
-                sys.stdout.flush()
-                account.last["login"] = now
-                login()
+        if now - last["heroes"] > addRandomness(t['send_heroes_for_work'] * 60):
+            last["heroes"] = now
+            refreshHeroes()
 
-            if now - account.last["all_heroes"] > addRandomness(t['send_all_heroes_for_work'] * 60):
-                if cw['auto_position']:
-                    account.window.moveTo(cw['left'], cw['top'])
-                    account.window.resizeTo(1015, 823)
-                account.last["all_heroes"] = now
-                sendAllHeroes()
-            
-            if now - account.last["refresh_heroes"] > addRandomness( t['refresh_heroes_positions'] * 60):
-                if cw['auto_position']:
-                    account.window.moveTo(cw['left'], cw['top'])
-                    account.window.resizeTo(1015, 823)
-                account.last["refresh_heroes"] = now
-                refreshHeroesPositions()
+        if now - last["new_map"] > t['check_for_new_map_button']:
+            last["new_map"] = now
 
-            # if now - account.last["heroes"] > addRandomness(t['send_heroes_for_work'] * 60):
-            #     if cw['auto_position']:
-            #         account.window.moveTo(cw['left'], cw['top'])
-            #         account.window.resizeTo(1015, 823)
-            #     account.last["heroes"] = now
-            #     refreshHeroes()
+            if clickBtn(images['new-map']):
+                loggerMapClicked()    
+        
+        if now - last["refresh_heroes"] > addRandomness( t['refresh_heroes_positions'] * 60):
+            last["refresh_heroes"] = now
+            refreshHeroesPositions()
 
-            sys.stdout.flush()
-            time.sleep(1)
+        #clickBtn(teasureHunt)
+        logger(None, progress_indicator=True)
 
         sys.stdout.flush()
         time.sleep(1)
