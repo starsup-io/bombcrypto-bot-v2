@@ -166,22 +166,4 @@ select_heroes_mode: "green"
 # Opções disponíveis: False ou True
 save_log_to_file: True
 
-window:
-  # [pt_BR] Opção para ajustar posição da janela
-  # Valor padrão : False
-  # Opções disponíveis: False ou True
-  auto_position: False
 
-  # [en_US]
-  # Default value: 10
-  #
-  # [pt_BR]
-  # Valor padrão: 10
-  left: 100
-
-  # [en_US]
-  # Default value: 10
-  #
-  # [pt_BR]
-  # Valor padrão: 10
-  top: 100
